@@ -1,0 +1,7 @@
+version: '3'
+services:
+  discovery:
+    build: C://Users/Владелец/IdeaProjects/streamua/eureka/
+   # image:  discovery-server
+    ports:
+      - 8761:8761
