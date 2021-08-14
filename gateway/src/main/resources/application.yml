@@ -5,8 +5,9 @@ spring:
     gateway:
       routes:
         - id: admin-dashboard
-          predicates: Path=/api/**
           uri: http://localhost:8040/
+          predicates:
+            - Path=/api/**
 server:
   port:
     8060

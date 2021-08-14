@@ -5,3 +5,24 @@ services:
    # image:  discovery-server
     ports:
       - 8761:8761
+    networks:
+      - local
+
+
+  gateway:
+    build: C://Users/Владелец/IdeaProjects/streamua/gateway/
+    ports:
+      - 8060:8060
+    networks:
+      - local
+
+  admin-dashbouard:
+    build: C://Users/Владелец/IdeaProjects/streamua/admin-dashboard/
+    ports:
+      - 8040:8040
+    networks:
+      - local
+
+networks:
+  local:
+    driver: bridge
