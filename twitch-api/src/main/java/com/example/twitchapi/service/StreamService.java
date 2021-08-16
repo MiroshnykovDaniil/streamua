@@ -30,7 +30,6 @@ public class StreamService {
         // we need to delete old streams that are not live now
         // @todo to think about better mechanism to deal with outdated info
         streamRepository.deleteAllInBatch();
-
         WebClient webClient = WebClient
                 .builder()
                 .baseUrl("https://api.twitch.tv/helix")
@@ -45,12 +44,18 @@ public class StreamService {
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
+
+        // Twitch Api gives only 20 records, cursors is used for pagination
+        // @todo write better parser
+        String cursor = response.substring(response.indexOf(("\"cursor\":"))+10,response.indexOf(("\"}}")));
+
+
+        System.out.println(cursor);
         List<Map> nodes = JsonPath.parse(response).read("$..data.*");
         ObjectMapper mapper = new ObjectMapper();
         CollectionType usersType = mapper.getTypeFactory().constructCollectionType(List.class, Stream.class);
         List<Stream> streams = mapper.convertValue(nodes, usersType);
         List<Channel> channels;
-
         channelRepository.setAllChannelsOffline();
 
         List<Channel> finalChannels=new ArrayList<>();
