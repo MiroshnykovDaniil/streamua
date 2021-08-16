@@ -1,7 +1,9 @@
 package com.example.twitchapi.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
@@ -12,6 +14,7 @@ import java.util.Calendar;
 @NoArgsConstructor
 @Data
 @Entity(name = "Channel")
+@JsonIgnoreProperties(value={ "tag_ids" }, allowGetters=true)
 public class Channel {
 
     @Id

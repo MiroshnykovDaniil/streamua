@@ -11,9 +11,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 @Service
 @Transactional
@@ -45,21 +44,21 @@ public class StreamService {
                 .bodyToMono(String.class)
                 .block();
 
-        // Twitch Api gives only 20 records, cursors is used for pagination
-        // @todo write better parser
-        String cursor = response.substring(response.indexOf(("\"cursor\":"))+10,response.indexOf(("\"}}")));
-
-
-        System.out.println(cursor);
         List<Map> nodes = JsonPath.parse(response).read("$..data.*");
         ObjectMapper mapper = new ObjectMapper();
         CollectionType usersType = mapper.getTypeFactory().constructCollectionType(List.class, Stream.class);
         List<Stream> streams = mapper.convertValue(nodes, usersType);
+        // Twitch Api gives only 20 records, cursors is used for pagination
+        // @todo write better parser
+        String cursor = response.substring(response.indexOf(("\"cursor\":"))+10,response.indexOf(("\"}}")));
+        // So we gonna find all the streams!
+        Set<Stream> completedStreams = completeUkrainianStreamList((new HashSet<>(streams)),cursor);
+
         List<Channel> channels;
         channelRepository.setAllChannelsOffline();
 
         List<Channel> finalChannels=new ArrayList<>();
-        streams.forEach(stream -> {
+        completedStreams.forEach(stream -> {
             Channel channel = new Channel(
                     stream.getUser_id(),
                     stream.getUser_login(),
@@ -73,8 +72,78 @@ public class StreamService {
             );
             finalChannels.add(channel);
         });
-        streamRepository.saveAll(streams);
+        streamRepository.saveAll(completedStreams);
         channelRepository.saveAll(finalChannels);
+        addChannelsLogo();
         return true;
     }
+
+    public void addChannelsLogo(){
+        List<Channel> channels = channelRepository.findAll();
+        List<Channel> updated = new ArrayList<>();
+        channels.forEach(channel ->{
+            if(channel.getThumbnail_url()==null){
+                channel.setThumbnail_url(
+                        getChannel(channel.getDisplay_name()).getThumbnail_url()
+                );
+                updated.add(channel);
+            }
+        });
+        channelRepository.saveAll(updated);
+    }
+
+    public Channel getChannel(String channelName){
+        WebClient webClient = WebClient
+                .builder()
+                .baseUrl("https://api.twitch.tv/helix")
+                .defaultHeader(HttpHeaders.AUTHORIZATION,"Bearer 6zwfw0sl7zfua6jpswoiezfngchcg6")
+                .build();
+        String response = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/search/channels")
+                            .queryParam("query",channelName)
+                            .queryParam("first","1")
+                        .build())
+                .header("Client-id","4gzf6imth4qwaomfugkd202f721x90")
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+        List<Map> nodes = JsonPath.parse(response).read("$..data.*");
+        ObjectMapper mapper = new ObjectMapper();
+        CollectionType usersType = mapper.getTypeFactory().constructCollectionType(Set.class, Channel.class);
+        Set<Channel> retrievedChannel = mapper.convertValue(nodes, usersType);
+        return retrievedChannel.iterator().next();
+    }
+
+    public Set<Stream> completeUkrainianStreamList(Set<Stream> streams, String cursor){
+        boolean exit = false;
+        WebClient webClient = WebClient
+                .builder()
+                .baseUrl("https://api.twitch.tv/helix")
+                .defaultHeader(HttpHeaders.AUTHORIZATION,"Bearer 6zwfw0sl7zfua6jpswoiezfngchcg6")
+                .build();
+        String response = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/streams")
+                        .queryParam("after",cursor)
+                        .queryParam("language","uk")
+                        .build())
+                .header("Client-id","4gzf6imth4qwaomfugkd202f721x90")
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+        if(response.length()<30) return streams;
+        {
+            List<Map> nodes = JsonPath.parse(response).read("$..data.*");
+            ObjectMapper mapper = new ObjectMapper();
+            CollectionType usersType = mapper.getTypeFactory().constructCollectionType(Set.class, Stream.class);
+            Set<Stream> responseStreams = mapper.convertValue(nodes, usersType);
+            String responseCursor = response.substring(response.indexOf(("\"cursor\":")) + 10, response.indexOf(("\"}}")));
+            streams.addAll(responseStreams);
+            streams.addAll(completeUkrainianStreamList(streams,responseCursor));
+        }
+        return streams;
+    }
+
+
 }
