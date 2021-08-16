@@ -1,9 +1,19 @@
 server:
   port: 8040
-
 spring:
   application:
     name: admin-dashboard
+  jpa:
+    database: MYSQL
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+  datasource:
+    platform: mysql
+    url: jdbc:mysql://localhost:3306/streamua/
+
+
+
 
 eureka:
   instance:
@@ -23,4 +33,3 @@ management:
       enabled: true
     health:
       show-details: ALWAYS
-
