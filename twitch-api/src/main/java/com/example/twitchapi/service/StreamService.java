@@ -12,17 +12,42 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.logging.Logger;
 
 @Service
 @Transactional
 public class StreamService {
     private final StreamRepository streamRepository;
     private final ChannelRepository channelRepository;
+    public final Logger log = Logger.getLogger("StreamService");
+
 
     public StreamService(StreamRepository streamRepository, ChannelRepository channelRepository) {
         this.streamRepository = streamRepository;
         this.channelRepository = channelRepository;
+    }
+
+    @PostConstruct
+    public void init(){
+        Thread t = new Thread(){
+            @Override
+            public void run() {
+                while(true){
+                    try{
+                        log.info("StreamService.init: thread sleeps");
+                        // we execute update thread every 5 minutes
+                        Thread.sleep(1000*60*5);
+                        log.info("StreamService.init: thread woke up");
+                        getUkrainianStreamList();
+                    }
+                    catch (InterruptedException | JsonProcessingException e){
+                    }
+                }
+            }
+        };
+        t.start();
     }
 
     public boolean getUkrainianStreamList() throws JsonProcessingException {
@@ -154,6 +179,4 @@ public class StreamService {
         }
         return streams;
     }
-
-
 }
