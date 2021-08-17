@@ -22,7 +22,7 @@ public class ChannelStatistics {
     @JoinColumn(name = "channel_id",referencedColumnName = "id")
     private Channel channelId;
 
-    private Boolean is_live;
+    private String is_live;
 
     private Integer viewerCount;
 

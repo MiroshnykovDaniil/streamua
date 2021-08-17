@@ -29,7 +29,6 @@ public class Channel {
     private String title;
     private Calendar started_at;
 
-
     public Channel(
             String id,
             String broadcaster_login,

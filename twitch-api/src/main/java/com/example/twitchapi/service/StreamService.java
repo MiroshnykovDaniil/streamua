@@ -36,11 +36,11 @@ public class StreamService {
             public void run() {
                 while(true){
                     try{
-                        log.info("StreamService.init: thread sleeps");
                         // we execute update thread every 5 minutes
-                        Thread.sleep(1000*60*5);
-                        log.info("StreamService.init: thread woke up");
                         getUkrainianStreamList();
+                        log.info("StreamService.init: thread sleeps");
+                        Thread.sleep(1000*60*1);
+                        log.info("StreamService.init: thread woke up");
                     }
                     catch (InterruptedException | JsonProcessingException e){
                     }
@@ -175,6 +175,9 @@ public class StreamService {
             ObjectMapper mapper = new ObjectMapper();
             CollectionType usersType = mapper.getTypeFactory().constructCollectionType(Set.class, Stream.class);
             Set<Stream> responseStreams = mapper.convertValue(nodes, usersType);
+
+            log.info("completeUkrainianStreamList: response: "+response);
+
             String responseCursor = response.substring(response.indexOf(("\"cursor\":")) + 10, response.indexOf(("\"}}")));
             streams.addAll(responseStreams);
             streams.addAll(completeUkrainianStreamList(streams,responseCursor));
