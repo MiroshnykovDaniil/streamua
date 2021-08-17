@@ -127,6 +127,7 @@ public class StreamService {
         channelRepository.saveAll(channels);
     }
 
+    // get info about channel from Twitch API
     public Channel getChannel(String channelName){
         WebClient webClient = WebClient
                 .builder()
@@ -150,6 +151,7 @@ public class StreamService {
         return retrievedChannel.iterator().next();
     }
 
+    // completing list of all ukrainian streams because of twitch api pagination
     public Set<Stream> completeUkrainianStreamList(Set<Stream> streams, String cursor){
         boolean exit = false;
         WebClient webClient = WebClient
