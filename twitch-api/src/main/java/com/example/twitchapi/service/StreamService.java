@@ -79,9 +79,9 @@ public class StreamService {
         // So we gonna find all the streams!
         Set<Stream> completedStreams = completeUkrainianStreamList((new HashSet<>(streams)),cursor);
 
-        List<Channel> channels;
         channelRepository.setAllChannelsOffline();
-        List<Channel> finalChannels=new ArrayList<>();
+
+        List<Channel> channels=new ArrayList<>();
         completedStreams.forEach(stream -> {
             Channel channel = new Channel(
                     stream.getUser_id(),
@@ -94,16 +94,16 @@ public class StreamService {
                     stream.getTitle(),
                     stream.getStarted_at()
             );
-            finalChannels.add(channel);
+            channels.add(channel);
         });
         streamRepository.saveAll(completedStreams);
-        channelRepository.saveAll(finalChannels);
-        addChannelsLogo();
+       // channelRepository.saveAll(channels);
+        addChannelsLogo(channels);
         return true;
     }
 
-    public void addChannelsLogo(){
-        List<Channel> channels = channelRepository.findAll();
+    public void addChannelsLogo(List<Channel> channels){
+       // List<Channel> channels = channelRepository.findAll();
         List<Channel> updated = new ArrayList<>();
         channels.forEach(channel ->{
             if(channel.getThumbnail_url()==null){
