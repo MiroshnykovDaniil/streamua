@@ -1,9 +1,9 @@
 package com.example.twitchapi.repository;
 
-import com.example.twitchapi.model.ChannelStatistics;
+import com.example.twitchapi.model.ChannelStatistic;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ChannelStatisticsRepository extends JpaRepository<ChannelStatistics,String> {
+public interface ChannelStatisticsRepository extends JpaRepository<ChannelStatistic,String> {
 
 
 }

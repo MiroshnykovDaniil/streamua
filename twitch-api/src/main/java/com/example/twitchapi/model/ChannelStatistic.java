@@ -10,7 +10,7 @@ import java.util.Calendar;
 @Data
 @NoArgsConstructor
 @Entity
-public class ChannelStatistics {
+public class ChannelStatistic {
 
     @Id
     @GeneratedValue(generator = "uuid")
@@ -24,6 +24,6 @@ public class ChannelStatistics {
 
     private String is_live;
 
-    private Integer viewerCount;
+    private String viewerCount;
 
 }

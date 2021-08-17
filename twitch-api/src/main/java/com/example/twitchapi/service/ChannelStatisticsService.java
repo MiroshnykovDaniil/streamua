@@ -2,15 +2,15 @@ package com.example.twitchapi.service;
 
 
 import com.example.twitchapi.model.Channel;
-import com.example.twitchapi.model.ChannelStatistics;
+import com.example.twitchapi.model.ChannelStatistic;
 import com.example.twitchapi.model.Stream;
 import com.example.twitchapi.repository.ChannelRepository;
 import com.example.twitchapi.repository.ChannelStatisticsRepository;
 import com.example.twitchapi.repository.StreamRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -30,24 +30,13 @@ public class ChannelStatisticsService {
     }
 
     @PostConstruct
-    public void getStatistics(){
-
+    public void init(){
         Thread t = new Thread(() -> {
             while(true){
                 try {
-                    List<Channel> channels = channelRepository.findAll();
-                    List<Stream> streams = streamRepository.findAll();
-                    List<ChannelStatistics> channelStatisticsList = new ArrayList<>();
-                    channels.forEach(channel -> {
-                                ChannelStatistics channelStatistics = new ChannelStatistics();
-                                channelStatistics.setChannelId(channel);
-                                channelStatistics.setStatsTime(Calendar.getInstance());
-                                channelStatistics.setIs_live(channel.getIs_live());
-                        channelStatisticsList.add(channelStatistics);
-                    });
-                    channelStatisticsRepository.saveAll(channelStatisticsList);
+                    getStatistics();
                     log.info("StreamService.init: thread sleeps");
-                    Thread.sleep(1000*60*3);
+                    Thread.sleep(1000*60*1);
                     log.info("StreamService.init: thread woke up");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -56,4 +45,23 @@ public class ChannelStatisticsService {
         });
         t.start();
     }
+
+    @Transactional
+    public void getStatistics(){
+        List<Stream> streams = streamRepository.findAll();
+        List<ChannelStatistic> channelStatisticsList = new ArrayList<>();
+        streams.forEach(stream -> {
+            Channel ch = new Channel();
+            ch.setId(stream.getUser_id());
+            ChannelStatistic channelStatistics = new ChannelStatistic();
+            channelStatistics.setChannelId(ch);
+            channelStatistics.setViewerCount(stream.getViewer_count());
+            channelStatistics.setIs_live(stream.getType());
+            channelStatistics.setStatsTime(Calendar.getInstance());
+            channelStatisticsList.add(channelStatistics);
+        });
+        channelStatisticsRepository.saveAll(channelStatisticsList);
+
+    }
+
 }
