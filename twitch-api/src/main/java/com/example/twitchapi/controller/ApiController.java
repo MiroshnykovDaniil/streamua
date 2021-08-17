@@ -16,21 +16,6 @@ public class ApiController {
     @GetMapping("/get")
     public String get() throws JsonProcessingException {
         service.getUkrainianStreamList();
-//        WebClient webClient = WebClient
-//                .builder()
-//                .baseUrl("https://api.twitch.tv/helix")
-//                .defaultHeader(HttpHeaders.AUTHORIZATION,"Bearer 6zwfw0sl7zfua6jpswoiezfngchcg6")
-//                .build();
-//
-//        String response = webClient.get()
-//                .uri(uriBuilder -> uriBuilder
-//                        .path("/streams")
-//                        .queryParam("language","uk")
-//                        .build())
-//                .header("Client-id","4gzf6imth4qwaomfugkd202f721x90")
-//                .retrieve()
-//                .bodyToMono(String.class)
-//                .block();
         return ResponseEntity.ok().toString();
     }
 }

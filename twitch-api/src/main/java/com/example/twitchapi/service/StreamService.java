@@ -56,7 +56,6 @@ public class StreamService {
 
         List<Channel> channels;
         channelRepository.setAllChannelsOffline();
-
         List<Channel> finalChannels=new ArrayList<>();
         completedStreams.forEach(stream -> {
             Channel channel = new Channel(
