@@ -92,6 +92,17 @@ public class StreamService {
         channelRepository.saveAll(updated);
     }
 
+    // This we will once or two a week to update outdated logos
+    public void updateAllChannelLogo(){
+        List<Channel> channels = channelRepository.findAll();
+        channels.forEach(channel ->{
+                channel.setThumbnail_url(
+                        getChannel(channel.getDisplay_name()).getThumbnail_url()
+                );
+        });
+        channelRepository.saveAll(channels);
+    }
+
     public Channel getChannel(String channelName){
         WebClient webClient = WebClient
                 .builder()

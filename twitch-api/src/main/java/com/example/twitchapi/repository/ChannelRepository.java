@@ -12,7 +12,7 @@ import javax.transaction.Transactional;
 public interface ChannelRepository extends JpaRepository<Channel,String> {
         @Modifying
         @Transactional
-        @Query(value="update channel ch set ch.is_live = false", nativeQuery = true)
+        @Query(value="update channel ch set ch.is_live = 'false'", nativeQuery = true)
         void setAllChannelsOffline();
 
 }
